@@ -55,7 +55,6 @@ export default class LoginScreen extends Component {
     }
 
     handleLogin = (auto = false) => {
-        console.log("handleLogin===")
         const { email, password } = this.state
 
         if (email == "") {
@@ -178,7 +177,6 @@ export default class LoginScreen extends Component {
     }
 
     render() {
-        console.log("spinnerVisible", this.state.spinnerVisible)
         return (
             <View style={styles.contentView}>
                 <ImageBackground

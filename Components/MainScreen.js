@@ -7,7 +7,9 @@ import {
     View,
     Plat,
     Platform,
-    TouchableOpacity
+    TouchableOpacity,
+    Image,
+    Button,
 } from 'react-native'
 import {
     BarcodePicker,
@@ -19,11 +21,31 @@ import {
     ScanOverlay
 } from 'scandit-react-native'
 import Global from '../Config/global'
-
+import images from '../Config/images'
 ScanditModule.setAppKey(Platform.OS === 'ios' ? Global.scandit_key_ios : Global.scandit_key_android)
 
 export default class MainScreen extends Component {
+    static navigationOptions = {
+        // header: null,
 
+        title: 'Capture VIN Number',
+        headerStyle: {
+            backgroundColor: '#222222',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+            fontWeight: 'bold',
+        },
+        headerRight: 
+            <TouchableOpacity onPress={() => alert('This is a button!')} style={{ flexDirection: 'row' }}  >
+                <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30, marginRight:15, }} />
+            </TouchableOpacity>
+            // <Button title="" onPress={() => null}>
+            //     <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30 }} />
+            // </Button>
+        ,
+        headerLeft: null,
+    }
 
     constructor(props) {
         super(props)
@@ -46,6 +68,8 @@ export default class MainScreen extends Component {
             password: '',
             spinnerVisible: false,
         }
+        // console.log("this.props.navigator===",this.props.navigator)
+        // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
     }
     componentWillMount() {
         this.barcodeSetting()
@@ -53,7 +77,6 @@ export default class MainScreen extends Component {
 
     componentDidMount() {
         this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE);
-        // this.scanner.setCameraSwitchVisibility(ScanOverlay.CameraSwitchVisibility.NEVER);
         this.scanner.startScanning()
     }
 
@@ -86,14 +109,19 @@ export default class MainScreen extends Component {
         /* For details on defaults and how to calculate the symbol counts for each symbology, take
            a look at http://docs.scandit.com/stable/c_api/symbologies.html. */
     }
-    handleChangeStyle = () => {
-        let styleNumber = (this.state.styleNumber + 1) % 5
-        let cameraVisibility = (this.state.cameraVisibility + 1) % 3
-        this.scanner.setGuiStyle(this.overlayStyles[styleNumber]);
-        this.scanner.setCameraSwitchVisibility(this.CameraSwitchVisibility[cameraVisibility]);
-        this.setState({ styleNumber, cameraVisibility })
-        this.setState({ styleNumber })
-    }
+    // handleChangeStyle = () => {
+    //     let styleNumber = (this.state.styleNumber + 1) % 5
+    //     let cameraVisibility = (this.state.cameraVisibility + 1) % 3
+    //     this.scanner.setGuiStyle(this.overlayStyles[styleNumber]);
+    //     this.scanner.setCameraSwitchVisibility(this.CameraSwitchVisibility[cameraVisibility]);
+    //     this.setState({ styleNumber, cameraVisibility })
+    //     this.setState({ styleNumber })
+    // }
+    // onNavigatorEvent(event) {
+    //     if (event.id == 'back') {
+    //         alert('back');
+    //     }
+    // }
     render() {
         return (
             <View style={{
