@@ -1,0 +1,7 @@
+rootProject.name = 'carster'
+include ':react-native-splash-screen'
+project(':react-native-splash-screen').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-splash-screen/android')
+include ':scandit-react-native'
+project(':scandit-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/scandit-react-native/android')
+
+include ':app'
