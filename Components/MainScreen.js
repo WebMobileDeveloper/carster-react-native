@@ -9,6 +9,7 @@ import {
     Platform,
     TouchableOpacity,
     Image,
+    BackHandler,
     Button,
 } from 'react-native'
 import {
@@ -36,13 +37,13 @@ export default class MainScreen extends Component {
         headerTitleStyle: {
             fontWeight: 'bold',
         },
-        headerRight: 
-            <TouchableOpacity onPress={() => alert('This is a button!')} style={{ flexDirection: 'row' }}  >
-                <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30, marginRight:15, }} />
+        headerRight: Platform.OS === 'ios' ? null :
+            <TouchableOpacity onPress={() => BackHandler.exitApp()} style={{ flexDirection: 'row' }}  >
+                <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30, marginRight: 15, }} />
             </TouchableOpacity>
-            // <Button title="" onPress={() => null}>
-            //     <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30 }} />
-            // </Button>
+        // <Button title="" onPress={() => null}>
+        //     <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30 }} />
+        // </Button>
         ,
         headerLeft: null,
     }
@@ -76,6 +77,9 @@ export default class MainScreen extends Component {
     }
 
     componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', function () {
+            BackHandler.exitApp();
+        });
         this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE);
         this.scanner.startScanning()
     }
@@ -99,29 +103,13 @@ export default class MainScreen extends Component {
             this.settings.setSymbologyEnabled(type, true)
         })
 
-        /* Some 1d barcode symbologies allow you to encode variable-length data. By default, the
-           Scandit BarcodeScanner SDK only scans barcodes in a certain length range. If your
-           application requires scanning of one of these symbologies, and the length is falling
-           outside the default range, you may need to adjust the "active symbol counts" for this
+        /* Some 1d barcode symbologies allow you to encode variable-length data. By default, the  Scandit BarcodeScanner SDK only scans barcodes in a certain length range. If your
+           application requires scanning of one of these symbologies, and the length is falling  outside the default range, you may need to adjust the "active symbol counts" for this
            symbology. This is shown in the following few lines of code. */
         this.settings.getSymbologySettings(Barcode.Symbology.CODE39)
             .activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-        /* For details on defaults and how to calculate the symbol counts for each symbology, take
-           a look at http://docs.scandit.com/stable/c_api/symbologies.html. */
-    }
-    // handleChangeStyle = () => {
-    //     let styleNumber = (this.state.styleNumber + 1) % 5
-    //     let cameraVisibility = (this.state.cameraVisibility + 1) % 3
-    //     this.scanner.setGuiStyle(this.overlayStyles[styleNumber]);
-    //     this.scanner.setCameraSwitchVisibility(this.CameraSwitchVisibility[cameraVisibility]);
-    //     this.setState({ styleNumber, cameraVisibility })
-    //     this.setState({ styleNumber })
-    // }
-    // onNavigatorEvent(event) {
-    //     if (event.id == 'back') {
-    //         alert('back');
-    //     }
-    // }
+        /* For details on defaults and how to calculate the symbol counts for each symbology, take  a look at http://docs.scandit.com/stable/c_api/symbologies.html. */
+    }    
     render() {
         return (
             <View style={{
