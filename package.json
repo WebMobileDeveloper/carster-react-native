@@ -13,6 +13,7 @@
     "react-native-easy-toast": "^1.1.0",
     "react-native-keyboard-aware-scroll-view": "^0.4.1",
     "react-native-loading-spinner-overlay": "^0.5.2",
+    "react-native-orientation": "git+https://github.com/WebMobileDeveloper/react-native-orientation.git",
     "react-native-splash-screen": "^3.0.6",
     "react-navigation": "^2.6.0",
     "scandit-react-native": "git+https://github.com/Scandit/barcodescanner-sdk-react-native.git"

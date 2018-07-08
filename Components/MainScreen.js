@@ -11,6 +11,8 @@ import {
     Image,
     BackHandler,
     Button,
+    Dimensions,
+    Alert
 } from 'react-native'
 import {
     BarcodePicker,
@@ -21,117 +23,194 @@ import {
     ScanSettings,
     ScanOverlay
 } from 'scandit-react-native'
+
+import Orientation from 'react-native-orientation'
 import Global from '../Config/global'
 import images from '../Config/images'
+
+
 ScanditModule.setAppKey(Platform.OS === 'ios' ? Global.scandit_key_ios : Global.scandit_key_android)
+const { width, height } = Dimensions.get('window')
+const contentHeight = height - 120
+const frameTop = (contentHeight - width) / 2
 
 export default class MainScreen extends Component {
     static navigationOptions = {
-        // header: null,
-
-        title: 'Capture VIN Number',
+        headerTitle: <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', textAlign: 'center', width: width }}>Capture VIN Number</Text>,
         headerStyle: {
             backgroundColor: '#222222',
         },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-            fontWeight: 'bold',
-        },
         headerRight: Platform.OS === 'ios' ? null :
-            <TouchableOpacity onPress={() => BackHandler.exitApp()} style={{ flexDirection: 'row' }}  >
-                <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30, marginRight: 15, }} />
-            </TouchableOpacity>
-        // <Button title="" onPress={() => null}>
-        //     <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30 }} />
-        // </Button>
-        ,
+            (<TouchableOpacity onPress={() => BackHandler.exitApp()} style={{ marginRight: 15, }}  >
+                <Image source={images.cross_line_Image} resizeMode={'stretch'} style={{ width: 30, height: 30 }} />
+            </TouchableOpacity>),
         headerLeft: null,
     }
 
     constructor(props) {
         super(props)
-        this.overlayStyles = [
-            ScanOverlay.GuiStyle.DEFAULT,
-            ScanOverlay.GuiStyle.LASER,
-            ScanOverlay.GuiStyle.LOCATIONS_ONLY,
-            ScanOverlay.GuiStyle.LOCATIONSONLY,
-            ScanOverlay.GuiStyle.NONE,
-        ]
-        this.CameraSwitchVisibility = [
-            ScanOverlay.CameraSwitchVisibility.NEVER,
-            ScanOverlay.CameraSwitchVisibility.ALWAYS,
-            ScanOverlay.CameraSwitchVisibility.ON_TABLET,
-        ]
+        this.timeoutRef = null
         this.state = {
-            overlayStyle: '',
-            styleNumber: 0,
-            cameraVisibility: 0,
-            password: '',
-            spinnerVisible: false,
+            rectImage: images.rect_port_Image,
+            orientation: '',
+            captured: false,
         }
-        // console.log("this.props.navigator===",this.props.navigator)
-        // this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-    }
-    componentWillMount() {
-        this.barcodeSetting()
     }
 
+    componentWillMount() {
+        const orientation = Orientation.getInitialOrientation()
+        this.updateOrientation(orientation)
+        this.barcodeSetting()
+        console.log("componentWillMount")
+    }
     componentDidMount() {
+        Orientation.addSensorBaseOrientationListener(this._sensorBaseOrientationChange)
+        Orientation.addSpecificOrientationListener(this._specificOrientationChange)
         BackHandler.addEventListener('hardwareBackPress', function () {
-            BackHandler.exitApp();
-        });
-        this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE);
+            BackHandler.exitApp()
+        })
+        this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE)
+        this.scanner.setBeepEnabled(true)
         this.scanner.startScanning()
+        this.startScanning()
+        this.subs = [
+            // this.props.navigation.addListener('willFocus', () => console.log('will focus')),
+            // this.props.navigation.addListener('willBlur', () => console.log('will blur')),
+            this.props.navigation.addListener('didFocus', () => this.startScanning()),
+            this.props.navigation.addListener('willBlur', () => {
+                this.timeoutRef = null
+                this.scanner.pauseScanning()
+            }),
+        ];
+    }
+    componentWillUnmount() {
+        Orientation.removeOrientationListener(this._sensorBaseOrientationChange)
+        Orientation.removeSpecificOrientationListener(this._specificOrientationChange)
+        this.timeoutRef = null
+        this.scanner.stopScanning()
+    }
+    _sensorBaseOrientationChange = (orientation) => {
+        this.updateOrientation(orientation)
+    }
+    _specificOrientationChange = (orientation) => {
+        this.updateOrientation(orientation)
+    }
+    updateOrientation = (orientation) => {
+        switch (orientation) {
+            case 'PORTRAIT':
+                this.setState({ rectImage: images.rect_port_Image, orientation })
+                break
+            case 'LANDSCAPE-RIGHT':
+                this.setState({ rectImage: images.rect_right_Image, orientation })
+                break
+            case 'PORTRAITUPSIDEDOWN':
+                this.setState({ rectImage: images.rect_updown_Image, orientation })
+                break
+            case 'LANDSCAPE-LEFT':
+                this.setState({ rectImage: images.rect_left_Image, orientation })
+                break
+            default:
+                this.setState({ rectImage: images.rect_port_Image, orientation })
+                break
+        }
+    }
+
+
+    startScanning = () => {
+        if (this.timeoutRef) {
+            clearTimeout(this.timeoutRef)
+            this.scanner.resumeScanning()
+        } else {
+            if (this.scanner) this.scanner.startScanning()
+        }
+        this.timeoutRef = setTimeout(() => this.pauseScanning(), 10000)
+    }
+    pauseScanning(session = null) {
+        if (this.timeoutRef) {
+            clearTimeout(this.timeoutRef)
+        }
+        if (this.scanner) this.scanner.pauseScanning()
+        if (session) {            // if scaned code            
+            let vin_number = session.newlyRecognizedCodes[0].data
+            if (vin_number.length > 17) {
+                if (vin_number.charAt(0) == 'I') {
+                    vin_number = vin_number.substring(1, 18);
+                } else {
+                    vin_number = vin_number.substring(0, 17);
+                }
+            }
+            Alert.alert(
+                'Captured!',
+                "Result: " + vin_number + "\n\n Please select search button for more information.",
+                [
+                    { text: 'SEARCH', onPress: () => this.startScanning() },
+                    { text: 'RETRY', onPress: () => this.startScanning() },
+                ],
+                { cancelable: false }
+            )
+        } else {                  //  if timeout
+            Alert.alert(
+                'VIN scan timed out!',
+                'VIN Number was not scaned for 15s. You can enter number manually.',
+                [
+                    { text: 'ENTER VIN MANUALLY', onPress: () => this.gotoManually() },
+                    { text: 'RETRY', onPress: () => this.startScanning() },
+                ],
+                { cancelable: false }
+            )
+        }
+
+    }
+
+
+    gotoManually = () => {
+        const url = Global.manually_url
+        this.props.navigation.navigate(
+            'WebViewScreeen',
+            { url },
+        )
     }
 
     barcodeSetting = () => {
-
         const codeTypes = [
-            Barcode.Symbology.EAN13,
-            Barcode.Symbology.EAN8,
-            Barcode.Symbology.UPCA,
-            Barcode.Symbology.UPCE,
-            Barcode.Symbology.CODE39,
-            Barcode.Symbology.ITF,
-            Barcode.Symbology.QR,
-            Barcode.Symbology.DATA_MATRIX,
-            Barcode.Symbology.DATA_MATRIX,
-            Barcode.Symbology.CODE128,
+            Barcode.Symbology.EAN13, Barcode.Symbology.EAN8, Barcode.Symbology.UPCA, Barcode.Symbology.UPCE, Barcode.Symbology.CODE39,
+            Barcode.Symbology.ITF, Barcode.Symbology.QR, Barcode.Symbology.DATA_MATRIX, Barcode.Symbology.DATA_MATRIX, Barcode.Symbology.CODE128,
         ]
         this.settings = new ScanSettings()
         codeTypes.forEach(type => {
             this.settings.setSymbologyEnabled(type, true)
         })
+        this.settings.getSymbologySettings(Barcode.Symbology.CODE39).activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    }
 
-        /* Some 1d barcode symbologies allow you to encode variable-length data. By default, the  Scandit BarcodeScanner SDK only scans barcodes in a certain length range. If your
-           application requires scanning of one of these symbologies, and the length is falling  outside the default range, you may need to adjust the "active symbol counts" for this
-           symbology. This is shown in the following few lines of code. */
-        this.settings.getSymbologySettings(Barcode.Symbology.CODE39)
-            .activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-        /* For details on defaults and how to calculate the symbol counts for each symbology, take  a look at http://docs.scandit.com/stable/c_api/symbologies.html. */
-    }    
+
     render() {
+        console.log("this.state.rectImage== ", this.state.rectImage)
         return (
-            <View style={{
-                flex: 1,
-                flexDirection: 'column'
-            }}>
+            <View style={styles.contentView}>
                 <BarcodePicker
-                    onScan={(session) => { this.onScan(session) }}
+                    onScan={(session) => { this.pauseScanning(session) }}
                     scanSettings={this.settings}
                     ref={(scan) => { this.scanner = scan }}
-                    style={{ flex: 10 }} />
-                {/* <TouchableOpacity activeOpacity={0.9} style={{ flex: 1 }} onPress={this.handleChangeStyle}>
-                    <Text style={{ color: 'black' }}>change Style</Text>
-                    <Text>{'overlayStyle : ' + this.overlayStyles[this.state.styleNumber]}</Text>
-                    <Text>{'CameraSwitchVisibility : ' + this.CameraSwitchVisibility[this.state.cameraVisibility]}</Text>
-                </TouchableOpacity> */}
+                    style={{ flex: 1, }} />
+                <Image source={this.state.rectImage} style={styles.rectImage} resizeMode={'stretch'} />
             </View>
+
         )
     }
 
-    onScan(session) {
-        alert(session.newlyRecognizedCodes[0].data + " " + session.newlyRecognizedCodes[0].symbology)
-    }
 
 }
+
+const styles = StyleSheet.create({
+    contentView: {
+        flex: 1,
+        flexDirection: 'column'
+    },
+    rectImage: {
+        position: 'absolute',
+        top: frameTop,
+        width: width,
+        height: width,
+    },
+})

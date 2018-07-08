@@ -6,3 +6,6 @@ react-native link scandit-react-native
 
 npm i react-native-splash-screen --save
 react-native link react-native-splash-screen
+
+npm install react-native-orientation --save
+react-native link react-native-orientation

@@ -5,6 +5,8 @@ import { createStackNavigator, } from 'react-navigation'
 import LoginScreen from './Components/LoginScreen'
 import WebViewScreeen from './Components/WebViewScreeen'
 import MainScreen from './Components/MainScreen'
+import Orientation from 'react-native-orientation'
+
 
 const RootStack = createStackNavigator(
   {
@@ -25,3 +27,5 @@ export default class App extends React.Component {
     return <RootStack />
   }
 }
+Orientation.lockToPortrait()
+// Orientation.unlockAllOrientations()
