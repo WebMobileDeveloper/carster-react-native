@@ -143,7 +143,7 @@ export default class MainScreen extends Component {
                 'Captured!',
                 "Result: " + vin_number + "\n\n Please select search button for more information.",
                 [
-                    { text: 'SEARCH', onPress: () => this.startScanning() },
+                    { text: 'SEARCH', onPress: () => this.gotoSearch(vin_number) },
                     { text: 'RETRY', onPress: () => this.startScanning() },
                 ],
                 { cancelable: false }
@@ -153,8 +153,8 @@ export default class MainScreen extends Component {
                 'VIN scan timed out!',
                 'VIN Number was not scaned for 15s. You can enter number manually.',
                 [
-                    { text: 'ENTER VIN MANUALLY', onPress: () => this.gotoManually() },
                     { text: 'RETRY', onPress: () => this.startScanning() },
+                    { text: 'ENTER VIN MANUALLY', onPress: () => this.gotoManually() },
                 ],
                 { cancelable: false }
             )
@@ -165,10 +165,10 @@ export default class MainScreen extends Component {
 
     gotoManually = () => {
         const url = Global.manually_url
-        this.props.navigation.navigate(
-            'WebViewScreeen',
-            { url },
-        )
+        this.props.navigation.navigate('WebViewScreeen', { url }, )
+    }
+    gotoSearch = (code) => {
+        this.props.navigation.navigate('ResultScreen', { code }, )
     }
 
     barcodeSetting = () => {

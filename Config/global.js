@@ -1,5 +1,6 @@
 export default Global = {
     login_url: "https://mycarster.com/webservices/login.php",
+    search_url: "https://mycarster.com/webservices/vin-search.php",
     forgot_url: "https://mycarster.com/?page_id=27/",
     site_url: "https://mycarster.com",
     register_url: "https://mycarster.com/?page_id=18/",

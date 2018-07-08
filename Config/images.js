@@ -10,7 +10,11 @@ const images = {
     rect_port_Image: require('../assets/rect_port.png'),   
     rect_updown_Image: require('../assets/rect_updown.png'),   
     rect_left_Image: require('../assets/rect_left.png'),   
-    rect_right_Image: require('../assets/rect_right.png'),   
+    rect_right_Image: require('../assets/rect_right.png'),  
+    alert_Image:require('../assets/alert.png'), 
+    footer_Image:require('../assets/footer_img.png'), 
+    results_Image:require('../assets/results.png'), 
+    top_back_Image:require('../assets/top_back.png'), 
 }
 
 export default images
