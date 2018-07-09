@@ -36,6 +36,7 @@
 		2DCD954D1E0B4F2C00145EB5 /* carsterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* carsterTests.m */; };
 		2DF0FFEE2056DD460020B375 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3EA31DF850E9000B6D8A /* libReact.a */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
+		7872E25920F2CB92005F34EF /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78F5033320F14B5F006E2881 /* libRCTOrientation.a */; };
 		78A0898B20EED0A100B90CE3 /* libSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A0898620EECF8300B90CE3 /* libSplashScreen.a */; };
 		78A0898C20EED0AE00B90CE3 /* libRCTScanditBarcodeScanner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A0894E20EECEB200B90CE3 /* libRCTScanditBarcodeScanner.a */; };
 		78A0898E20EED0C100B90CE3 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 78A0898D20EED0C100B90CE3 /* libc++.tbd */; };
@@ -58,8 +59,6 @@
 		78A089B020EED3E500B90CE3 /* ScanditBarcodeScanner.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 78A089AF20EED3E500B90CE3 /* ScanditBarcodeScanner.bundle */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
-		B4340192C5D644A2BE0A5728 /* libRNFlash.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 882847C97FEA4C83850E416E /* libRNFlash.a */; };
-		E5D2FDA12B2C44148D7E019F /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FCEE58A83DA4D82883F3DE7 /* libRCTOrientation.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -343,13 +342,6 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RCTOrientation;
 		};
-		78F5036E20F1AFCF006E2881 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 21A7E71C39574707A58830EA /* RNFlash.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 70CBC7D91FD83972005ED72C;
-			remoteInfo = RNFlash;
-		};
 		832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */;
@@ -387,7 +379,6 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = carster/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		18B34FD56D5349989B87CB16 /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
-		21A7E71C39574707A58830EA /* RNFlash.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFlash.xcodeproj; path = "../node_modules/react-native-flash/ios/RNFlash.xcodeproj"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* carster-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "carster-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* carster-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "carster-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -434,6 +425,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7872E25920F2CB92005F34EF /* libRCTOrientation.a in Frameworks */,
 				78A089AC20EED16300B90CE3 /* MediaPlayer.framework in Frameworks */,
 				78A089AA20EED15C00B90CE3 /* SystemConfiguration.framework in Frameworks */,
 				78A089A820EED15300B90CE3 /* QuartzCore.framework in Frameworks */,
@@ -466,8 +458,6 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				E5D2FDA12B2C44148D7E019F /* libRCTOrientation.a in Frameworks */,
-				B4340192C5D644A2BE0A5728 /* libRNFlash.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -692,14 +682,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		78F5036B20F1AFCE006E2881 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				78F5036F20F1AFCF006E2881 /* libRNFlash.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -718,7 +700,6 @@
 				F6222C35232A49B79D4A6CAE /* RCTScanditBarcodeScanner.xcodeproj */,
 				5D43E329B5DD421BBD2123FB /* SplashScreen.xcodeproj */,
 				18B34FD56D5349989B87CB16 /* RCTOrientation.xcodeproj */,
-				21A7E71C39574707A58830EA /* RNFlash.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -937,10 +918,6 @@
 				{
 					ProductGroup = 146834001AC3E56700842450 /* Products */;
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-				},
-				{
-					ProductGroup = 78F5036B20F1AFCE006E2881 /* Products */;
-					ProjectRef = 21A7E71C39574707A58830EA /* RNFlash.xcodeproj */;
 				},
 				{
 					ProductGroup = 78A0898220EECF8300B90CE3 /* Products */;
@@ -1222,13 +1199,6 @@
 			fileType = archive.ar;
 			path = libRCTOrientation.a;
 			remoteRef = 78F5033220F14B5F006E2881 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		78F5036F20F1AFCF006E2881 /* libRNFlash.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNFlash.a;
-			remoteRef = 78F5036E20F1AFCF006E2881 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		832341B51AAA6A8300B99B32 /* libRCTText.a */ = {

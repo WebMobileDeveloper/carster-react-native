@@ -8,18 +8,13 @@ import {
     TouchableOpacity,
     Dimensions,
     AsyncStorage,
-    Switch,
     ImageBackground,
-    ScrollView,
-    Platform,
     Alert,
     ActivityIndicator
 } from 'react-native'
 import SplashScreen from 'react-native-splash-screen'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import Spinner from 'react-native-loading-spinner-overlay'
-import DialogBox from 'react-native-dialogbox'
-import Toast, { DURATION } from 'react-native-easy-toast'
+import Toast from 'react-native-easy-toast'
 import images from '../Config/images'
 import Global from '../Config/global'
 
@@ -42,9 +37,6 @@ export default class LoginScreen extends Component {
         }
     }
     componentDidMount() {
-        // do stuff while splash screen is shown
-        // After having done stuff (such as async tasks) hide the splash screen
-
         SplashScreen.hide()
         AsyncStorage.getItem('auth').then((value) => {
             if (value) {
@@ -116,13 +108,6 @@ export default class LoginScreen extends Component {
                                     'MainScreen',
                                 )
                             })
-
-
-                            // this.dialogbox.tip({
-                            //     content: 'come on!',
-                            // });
-
-
                         } else {
                             Alert.alert(
                                 'Login failed!',
@@ -147,50 +132,26 @@ export default class LoginScreen extends Component {
                     // )
                 })
             }
-
-
         }
-
-
-
     }
-    handleForgot = () => {
-        const url = Global.forgot_url
+
+    handleLink = (url, title) => {
         this.props.navigation.navigate(
             'WebViewScreeen',
-            { url },
-        )
-    }
-    handleSignUp = () => {
-        const url = Global.register_url
-        this.props.navigation.navigate(
-            'WebViewScreeen',
-            { url },
-        )
-    }
-    handleVisit = () => {
-        const url = Global.site_url
-        this.props.navigation.navigate(
-            'WebViewScreeen',
-            { url },
+            { url, title },
         )
     }
 
     render() {
         return (
-            <View style={styles.contentView}>
-                <ImageBackground
-                    resizeMode={'stretch'} // or cover
-                    style={{ flex: 1 }} // must be passed from the parent, the number may vary depending upon your screen size
-                    source={images.login_back_Image}  >
-                    <View style={styles.logoFrame}><Image source={images.logo_Image} resizeMode={'stretch'} style={styles.logoImage} /></View>
 
-                    {/* <ScrollView> */}
-                    <KeyboardAwareScrollView scrollEnabled={true}
-                        resetScrollToCoords={{ x: 0, y: 0 }}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.contentFrame} >
+            <ImageBackground resizeMode={'stretch'} style={styles.background} source={images.login_back_Image}  >
+                <KeyboardAwareScrollView scrollEnabled={true} resetScrollToCoords={{ x: 0, y: 0 }}
+                    showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentView} >
 
+                    <Image source={images.logo_Image} resizeMode={'stretch'} style={styles.logoImage} />
+
+                    <View style={styles.contentFrame}>
                         <View style={styles.textInputFrame} >
                             <Image source={images.email_gray_Image} style={styles.textImage} resizeMode={'stretch'} />
                             <TextInput keyboardType='email-address'
@@ -220,94 +181,100 @@ export default class LoginScreen extends Component {
                                 returnKeyType='done'
                                 style={styles.textInput} />
                         </View>
-                        <TouchableOpacity activeOpacity={0.9} style={styles.loginFrame} disabled={this.state.spinnerVisible} onPress={this.handleLogin}>
+                        <TouchableOpacity activeOpacity={0.9} style={styles.loginFrame} disabled={this.state.spinnerVisible} onPress={() => this.handleLogin(true)}>
                             <Image style={styles.login_button_Image} source={images.login_button_Image} />
                         </TouchableOpacity>
                         <View style={styles.forgotFrame} >
-                            <TouchableOpacity activeOpacity={0.9} onPress={this.handleForgot}>
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(global.forgot_url, "Forgot Password")}>
                                 <Text style={styles.forgotText}>Forgot password?</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.signUpFrame}>
-                            <TouchableOpacity activeOpacity={0.9} onPress={this.handleSignUp}>
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(global.register_url, "Register")}>
                                 <Text style={styles.signUpText}>Create new account</Text>
                             </TouchableOpacity>
                         </View>
-                    </KeyboardAwareScrollView>
+                    </View>
+
                     <View style={styles.visitFrame}>
-                        <TouchableOpacity activeOpacity={0.9} onPress={this.handleVisit}>
+                        <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(global.site_url, "Visit Website")}>
                             <Text style={styles.visitText}>Visit Website</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {/* </ScrollView> */}
-                </ImageBackground>
-                {/* <Spinner ref={(ref) => this.Spinner = ref} visible={this.state.spinnerVisible} /> */}
-                {/* <ActivityIndicator size="large" color="#0000ff" visible={this.state.spinnerVisible}/> */}
-                {this.state.spinnerVisible &&
-                    <View style={styles.loading}>
-                        <ActivityIndicator size='large' />
-                    </View>
-                }
-                {/** dialogbox component */}
-                {/* <DialogBox ref={dialogbox => { this.dialogbox = dialogbox }} /> */}
-                <Toast ref="toast" />
-            </View>
+                    {this.state.spinnerVisible &&
+                        <View style={styles.loading}>
+                            <ActivityIndicator size='large' />
+                        </View>
+                    }
+
+                    <Toast ref="toast" />
+
+                </KeyboardAwareScrollView>
+            </ImageBackground>
         )
     }
 }
 
 const styles = StyleSheet.create({
     contentView: {
-        flex: 10,
-    },
-    logoFrame: {
-        position: 'absolute',
-        top: height * 0.085,
+        flex: 1,
         width: width,
-        flexDirection: 'row',
-        justifyContent: 'center',
-
+        height: height,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    background: {
+        flex: 1,
+        width: width,
+        height: height
     },
     logoImage: {
+        marginTop: height * 0.1,
         width: width * 0.21,
         height: height * 0.13
     },
+
+
+    //====== content===========
+
     contentFrame: {
-        flex: 1,
-        paddingTop: height * 0.5 - 100,
+        flexDirection: 'column',
         alignItems: 'center',
-        paddingBottom: 80,
     },
     textInputFrame: {
         width: width * 0.7,
-        height: 30,
+        height: 35,
         flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'flex-start',
+        borderColor: 'white',
         paddingHorizontal: 8,
         borderBottomWidth: 1,
-        borderColor: 'white',
+        backgroundColor: 'rgba(100,100,100,0.1)',
     },
     textImage: {
         width: 30,
         height: 26,
     },
     textInput: {
-        flex: 1,
+        width: width * 0.7 - 46,
         textAlign: 'left',
-        color: 'white',
-        fontSize: 15,
+        color: '#555555',
+        fontSize: 18,
         fontWeight: 'bold',
         marginLeft: 8,
+        paddingBottom: 3,
     },
     loginFrame: {
-        marginTop: 30,
+        marginTop: 20,
     },
     login_button_Image: {
-        width: 120,
-        height: 40,
+        width: width / 3,
+        height: width / 9,
     },
+
+
 
     // forgot
     forgotFrame: {
@@ -321,8 +288,9 @@ const styles = StyleSheet.create({
     forgotText: {
         color: 'rgb(10,80,206)',
         fontWeight: '500',
-
     },
+
+
     // signup
     signUpFrame: {
         marginTop: 30,
@@ -337,6 +305,8 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontSize: 18,
     },
+
+
     // visit
     visitFrame: {
         paddingBottom: 20,

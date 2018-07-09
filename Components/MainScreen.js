@@ -1,25 +1,19 @@
 import React, { Component } from 'react'
 import {
-    AppRegistry,
     StyleSheet,
     Text,
-    findNodeHandle,
     View,
-    Plat,
     Platform,
     TouchableOpacity,
     Image,
     BackHandler,
-    Button,
     Dimensions,
     Alert
 } from 'react-native'
 import {
     BarcodePicker,
     ScanditModule,
-    ScanSession,
     Barcode,
-    SymbologySettings,
     ScanSettings,
     ScanOverlay
 } from 'scandit-react-native'
@@ -165,7 +159,8 @@ export default class MainScreen extends Component {
 
     gotoManually = () => {
         const url = Global.manually_url
-        this.props.navigation.navigate('WebViewScreeen', { url }, )
+        const title = "Maual Input"
+        this.props.navigation.navigate('WebViewScreeen', { url, title }, )
     }
     gotoSearch = (code) => {
         this.props.navigation.navigate('ResultScreen', { code }, )
