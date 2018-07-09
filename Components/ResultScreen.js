@@ -14,7 +14,7 @@ import {
 import ScaledImage from './ScaledImage'
 import Global from '../Config/global'
 import images from '../Config/images'
-
+import ApiUtils from './ApiUtils'
 
 const { width, height } = Dimensions.get('window')
 const scrollwidth = width - 16
@@ -66,44 +66,28 @@ export default class ResultScreen extends Component {
             }
         }
     }
-
-    componentWillMount() {
-
-    }
     componentDidMount() {
         this.setState({ loading: true })
-        try {
-            fetch(Global.search_url, {
+        const _self = this
+        fetch(Global.search_url,
+            {
                 method: "POST",
                 headers: new Headers({
                     'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
                 }),
                 body: "vin=" + this.state.code
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json()
-                } else {
-                    this.setState({ loading: false }, () => {
-                        Alert.alert(
-                            'Connection Error!',
-                            "Can't connect to server. Please retry after some time.",
-                            [
-                                { text: 'OK', onPress: () => { } },
-                            ],
-                            { cancelable: false }
-                        )
-                    })
-                }
-            }).then((responseData) => {
-                this.setState({ loading: false }, () => {
-                    if (responseData.status == 200) {   // login success 
-                        console.log("responseData===", responseData)
+            })
+            .then(ApiUtils.checkStatus)
+            .then((response) => { return response.json() })
+            .then((responseData) => {
+                _self.setState({ loading: false }, () => {
+                    if (responseData.status == 200) {   // fetch data success 
                         const { search_data, alerts } = responseData
-                        this.setState({ search_data, alerts })
+                        _self.setState({ search_data, alerts })
                     } else {
                         Alert.alert(
-                            'Wrong Data!',
-                            JSON.stringify(responseData),
+                            'Unknown Data!',
+                            responseData.error,
                             [
                                 { text: 'OK', onPress: () => { } },
                             ],
@@ -112,21 +96,19 @@ export default class ResultScreen extends Component {
                     }
                 })
             })
-        } catch (error) {
-            this.setState({ spinnerVisible: false }, () => {
-                // Alert.alert(
-                //     'Network Error!',
-                //     "Please check your network connection and try again!",
-                //     [
-                //         { text: 'OK', onPress: () => this.emailInput.focus() },
-                //     ],
-                //     { cancelable: false }
-                // )
+            .catch(function (error) {
+                _self.setState({ loading: false })
+                Alert.alert(
+                    'Network Error!',
+                    "Please check your network connection and try again!",
+                    [
+                        { text: 'OK', onPress: () => { } },
+                    ],
+                    { cancelable: false }
+                )
             })
-        }
-    }
-    componentWillUnmount() {
-    }
+            .done()
+    }    
 
     _renderItem = () => {
         const items = { ...this.state.search_data }

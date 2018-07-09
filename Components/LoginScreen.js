@@ -17,7 +17,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Toast from 'react-native-easy-toast'
 import images from '../Config/images'
 import Global from '../Config/global'
-
+import ApiUtils from './ApiUtils'
 
 const { width, height } = Dimensions.get('window')
 
@@ -33,7 +33,7 @@ export default class LoginScreen extends Component {
         this.state = {
             email: '',
             password: '',
-            spinnerVisible: false,
+            loading: false,
         }
     }
     componentDidMount() {
@@ -41,98 +41,94 @@ export default class LoginScreen extends Component {
         AsyncStorage.getItem('auth').then((value) => {
             if (value) {
                 const auth = JSON.parse(value)
-                this.setState({ email: auth.email, password: auth.password }, () => this.handleLogin(true))
+                this.setState({ email: auth.email, password: auth.password }, () => this.handleLogin())
             }
         })
     }
 
-    handleLogin = (auto = false) => {
+    checkAuth = () => {
         const { email, password } = this.state
-
         if (email == "") {
-            if (auto) {
-                Alert.alert(
-                    'User Name field is required!',
-                    'Please input your username.',
-                    [
-                        { text: 'OK', onPress: () => this.emailInput.focus() },
-                    ],
-                    { cancelable: false }
-                )
-            } else {
-                return
-            }
+            Alert.alert(
+                'User Name is required!',
+                'Please input your email.',
+                [
+                    { text: 'OK', onPress: () => this.emailInput.focus() },
+                ],
+                { cancelable: false }
+            )
         } else if (password == "") {
-            if (auto) {
-                Alert.alert(
-                    'Password field is required!',
-                    'Please input your password.',
-                    [
-                        { text: 'OK', onPress: () => this.passwordInput.focus() },
-                    ],
-                    { cancelable: false }
-                )
-            } else {
-                return
-            }
+            Alert.alert(
+                'Password is required!',
+                'Please input your password.',
+                [
+                    { text: 'OK', onPress: () => this.passwordInput.focus() },
+                ],
+                { cancelable: false }
+            )
         } else {
-            this.setState({ spinnerVisible: true })
-            try {
-                fetch(Global.login_url, {
-                    method: "POST",
-                    headers: new Headers({
-                        'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
-                    }),
-                    body: "user_login=" + email + "&user_pass=" + password
-                }).then((response) => {
-                    if (response.ok) {
-                        return response.json()
-                    } else {
-                        this.setState({ spinnerVisible: false }, () => {
-                            Alert.alert(
-                                'Connection Error!',
-                                "Can't connect to server. Please retry after some time.",
-                                [
-                                    { text: 'OK', onPress: () => this.emailInput.focus() },
-                                ],
-                                { cancelable: false }
+            this.handleLogin()
+        }
+    }
+
+    handleLogin = () => {
+        const _self = this
+        const { email, password } = this.state
+        this.setState({ loading: true })
+
+        fetch(Global.login_url,
+            {
+                method: "POST",
+                headers: new Headers({
+                    'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
+                }),
+                body: "user_login=" + email + "&user_pass=" + password
+            })
+            .then(ApiUtils.checkStatus)
+            .then((response) => { return response.json() })
+            .then((responseData) => {
+                _self.setState({ loading: false })
+                if (responseData === [] || responseData.length === 0) {
+                    Alert.alert(
+                        'Connection Error!',
+                        "Couldn't connect to server. Please retry after a moment",
+                        [
+                            { text: 'OK', onPress: () => _self.emailInput.focus() },
+                        ],
+                        { cancelable: false }
+                    )
+                } else {
+                    if (responseData.Status == 200) {   // login success 
+                        _self.refs.toast.show('Login Success!', 500)
+                        AsyncStorage.setItem('auth', JSON.stringify({ email: email, password: password }), () => {
+                            _self.props.navigation.navigate(
+                                'MainScreen',
                             )
                         })
+                    } else {
+                        Alert.alert(
+                            'Login failed!',
+                            responseData.Message,
+                            [
+                                { text: 'OK', onPress: () => _self.emailInput.focus() },
+                            ],
+                            { cancelable: false }
+                        )
                     }
-                }).then((responseData) => {
-                    this.setState({ spinnerVisible: false }, () => {
-                        if (responseData.Status == 200) {   // login success 
-                            this.refs.toast.show('Login Success!', 500);
-                            AsyncStorage.setItem('auth', JSON.stringify({ email: email, password: password }), () => {
-                                this.props.navigation.navigate(
-                                    'MainScreen',
-                                )
-                            })
-                        } else {
-                            Alert.alert(
-                                'Login failed!',
-                                responseData.Message,
-                                [
-                                    { text: 'OK', onPress: () => this.emailInput.focus() },
-                                ],
-                                { cancelable: false }
-                            )
-                        }
-                    })
-                })
-            } catch (error) {
-                this.setState({ spinnerVisible: false }, () => {
-                    // Alert.alert(
-                    //     'Network Error!',
-                    //     "Please check your network connection and try again!",
-                    //     [
-                    //         { text: 'OK', onPress: () => this.emailInput.focus() },
-                    //     ],
-                    //     { cancelable: false }
-                    // )
-                })
-            }
-        }
+                }
+            })
+            .catch(function (error) {
+                _self.setState({ loading: false })
+                Alert.alert(
+                    'Network Error!',
+                    "Please check your network connection and try again!",
+                    [
+                        { text: 'OK', onPress: () => _self.emailInput.focus() },
+                    ],
+                    { cancelable: false }
+                )
+            })
+            .done()
     }
 
     handleLink = (url, title) => {
@@ -144,7 +140,6 @@ export default class LoginScreen extends Component {
 
     render() {
         return (
-
             <ImageBackground resizeMode={'stretch'} style={styles.background} source={images.login_back_Image}  >
                 <KeyboardAwareScrollView scrollEnabled={true} resetScrollToCoords={{ x: 0, y: 0 }}
                     showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentView} >
@@ -181,28 +176,28 @@ export default class LoginScreen extends Component {
                                 returnKeyType='done'
                                 style={styles.textInput} />
                         </View>
-                        <TouchableOpacity activeOpacity={0.9} style={styles.loginFrame} disabled={this.state.spinnerVisible} onPress={() => this.handleLogin(true)}>
+                        <TouchableOpacity activeOpacity={0.9} style={styles.loginFrame} disabled={this.state.loading} onPress={() => this.checkAuth()}>
                             <Image style={styles.login_button_Image} source={images.login_button_Image} />
                         </TouchableOpacity>
                         <View style={styles.forgotFrame} >
-                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(global.forgot_url, "Forgot Password")}>
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.forgot_url, "Forgot Password")}>
                                 <Text style={styles.forgotText}>Forgot password?</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.signUpFrame}>
-                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(global.register_url, "Register")}>
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.register_url, "Register")}>
                                 <Text style={styles.signUpText}>Create new account</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     <View style={styles.visitFrame}>
-                        <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(global.site_url, "Visit Website")}>
+                        <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.site_url, "Visit Website")}>
                             <Text style={styles.visitText}>Visit Website</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {this.state.spinnerVisible &&
+                    {this.state.loading &&
                         <View style={styles.loading}>
                             <ActivityIndicator size='large' />
                         </View>

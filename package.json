@@ -16,7 +16,7 @@
     "react-native-orientation": "git+https://github.com/WebMobileDeveloper/react-native-orientation.git",
     "react-native-splash-screen": "^3.0.6",
     "react-navigation": "^2.6.0",
-    "scandit-react-native": "git+https://github.com/Scandit/barcodescanner-sdk-react-native.git"
+    "scandit-react-native": "git+https://github.com/WebMobileDeveloper/scandit-react-native.git"
   },
   "devDependencies": {
     "babel-jest": "23.2.0",

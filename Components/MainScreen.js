@@ -17,7 +17,6 @@ import {
     ScanSettings,
     ScanOverlay
 } from 'scandit-react-native'
-
 import Orientation from 'react-native-orientation'
 import Global from '../Config/global'
 import images from '../Config/images'
@@ -55,40 +54,45 @@ export default class MainScreen extends Component {
         const orientation = Orientation.getInitialOrientation()
         this.updateOrientation(orientation)
         this.barcodeSetting()
-        console.log("componentWillMount")
     }
     componentDidMount() {
         Orientation.addSensorBaseOrientationListener(this._sensorBaseOrientationChange)
         Orientation.addSpecificOrientationListener(this._specificOrientationChange)
+        // ====== for android hardware back press  ========
         BackHandler.addEventListener('hardwareBackPress', function () {
             BackHandler.exitApp()
         })
-        this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE)
-        this.scanner.setBeepEnabled(true)
-        this.scanner.startScanning()
-        this.startScanning()
+        // ====    register screen active events  ============
         this.subs = [
-            // this.props.navigation.addListener('willFocus', () => console.log('will focus')),
-            // this.props.navigation.addListener('willBlur', () => console.log('will blur')),
-            this.props.navigation.addListener('didFocus', () => this.startScanning()),
+            this.props.navigation.addListener('didFocus', () => this.startRound()),
             this.props.navigation.addListener('willBlur', () => {
-                this.timeoutRef = null
-                this.scanner.pauseScanning()
+                this.stopRound()
+                this.scanner.switchTorchOn([false])
             }),
         ];
+
+        //  ======  scanner setting  ==============
+        this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE)
+        this.scanner.setBeepEnabled(true)
+        this.startRound()
     }
     componentWillUnmount() {
         Orientation.removeOrientationListener(this._sensorBaseOrientationChange)
         Orientation.removeSpecificOrientationListener(this._specificOrientationChange)
-        this.timeoutRef = null
+        if (this.timeoutRef) {
+            clearTimeout(this.timeoutRef)
+        }
         this.scanner.stopScanning()
     }
+
     _sensorBaseOrientationChange = (orientation) => {
         this.updateOrientation(orientation)
     }
+
     _specificOrientationChange = (orientation) => {
         this.updateOrientation(orientation)
     }
+
     updateOrientation = (orientation) => {
         switch (orientation) {
             case 'PORTRAIT':
@@ -109,53 +113,57 @@ export default class MainScreen extends Component {
         }
     }
 
-
-    startScanning = () => {
+    startRound = () => {
         if (this.timeoutRef) {
             clearTimeout(this.timeoutRef)
-            this.scanner.resumeScanning()
-        } else {
-            if (this.scanner) this.scanner.startScanning()
         }
-        this.timeoutRef = setTimeout(() => this.pauseScanning(), 10000)
+        this.scanner.startScanning()
+        this.timeoutRef = setTimeout(() => this.stopRound(true), Global.captureTime)
     }
-    pauseScanning(session = null) {
+
+
+    stopRound(byTimeout) {
+        const _self = this
         if (this.timeoutRef) {
             clearTimeout(this.timeoutRef)
         }
         if (this.scanner) this.scanner.pauseScanning()
-        if (session) {            // if scaned code            
-            let vin_number = session.newlyRecognizedCodes[0].data
-            if (vin_number.length > 17) {
-                if (vin_number.charAt(0) == 'I') {
-                    vin_number = vin_number.substring(1, 18);
-                } else {
-                    vin_number = vin_number.substring(0, 17);
-                }
-            }
-            Alert.alert(
-                'Captured!',
-                "Result: " + vin_number + "\n\n Please select search button for more information.",
-                [
-                    { text: 'SEARCH', onPress: () => this.gotoSearch(vin_number) },
-                    { text: 'RETRY', onPress: () => this.startScanning() },
-                ],
-                { cancelable: false }
-            )
-        } else {                  //  if timeout
+
+        if (byTimeout) {//  if timeout
             Alert.alert(
                 'VIN scan timed out!',
                 'VIN Number was not scaned for 15s. You can enter number manually.',
                 [
-                    { text: 'RETRY', onPress: () => this.startScanning() },
-                    { text: 'ENTER VIN MANUALLY', onPress: () => this.gotoManually() },
+                    { text: 'RETRY', onPress: () => _self.startRound() },
+                    { text: 'ENTER VIN MANUALLY', onPress: () => _self.gotoManually() },
                 ],
                 { cancelable: false }
             )
         }
-
     }
 
+
+    captureHandler = (session) => {
+        this.stopRound()
+        const _self = this
+        let vin_number = session.newlyRecognizedCodes[0].data
+        if (vin_number.length > 17) {
+            if (vin_number.charAt(0) == 'I') {
+                vin_number = vin_number.substring(1, 18);
+            } else {
+                vin_number = vin_number.substring(0, 17);
+            }
+        }
+        Alert.alert(
+            'Captured!',
+            "Result: " + vin_number + "\n\n Please select search button for more information.",
+            [
+                { text: 'SEARCH', onPress: () => _self.gotoSearch(vin_number) },
+                { text: 'RETRY', onPress: () => _self.startRound() },
+            ],
+            { cancelable: false }
+        )
+    }
 
     gotoManually = () => {
         const url = Global.manually_url
@@ -184,7 +192,7 @@ export default class MainScreen extends Component {
         return (
             <View style={styles.contentView}>
                 <BarcodePicker
-                    onScan={(session) => { this.pauseScanning(session) }}
+                    onScan={(session) => { this.captureHandler(session) }}
                     scanSettings={this.settings}
                     ref={(scan) => { this.scanner = scan }}
                     style={{ flex: 1, }} />
@@ -193,8 +201,6 @@ export default class MainScreen extends Component {
 
         )
     }
-
-
 }
 
 const styles = StyleSheet.create({
