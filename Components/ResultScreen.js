@@ -108,7 +108,7 @@ export default class ResultScreen extends Component {
                 )
             })
             .done()
-    }    
+    }
 
     _renderItem = () => {
         const items = { ...this.state.search_data }
@@ -130,7 +130,15 @@ export default class ResultScreen extends Component {
 
     _renderAlert = () => {
         const alerts = { ...this.state.alerts }
-        const keys = Object.keys(alerts)
+        const keys = Object.keys(alerts).sort((a, b) => {
+            if (this.getAlertOrder(a) > this.getAlertOrder(b)) {
+                return 1
+            } else if (this.getAlertOrder(a) < this.getAlertOrder(b)) {
+                return -1
+            } else {
+                return 0
+            }
+        })
         return keys.map((key) => {
             const title = key.replace("_", " ").toUpperCase()
             const content = (alerts[key].content) ? alerts[key].content : "NA"
@@ -147,7 +155,18 @@ export default class ResultScreen extends Component {
             )
         })
     }
-
+    getAlertOrder = (key) => {
+        switch (key) {
+            case "hookup_alert":
+                return 0
+            case "oilpan_alert":
+                return 1
+            case "bumper_alert":
+                return 2
+            default:
+                return 3
+        }
+    }
     gotoWebPageHandler = (url, title) => {
         this.props.navigation.navigate(
             'WebViewScreeen',
@@ -194,7 +213,7 @@ export default class ResultScreen extends Component {
                         <TouchableOpacity onPress={() => this.gotoWebPageHandler(Global.inspec_url, "Inspection Report")}><Text style={styles.inspectionText}>INSPECTION REPORT</Text></TouchableOpacity>
 
                         {/* enterprise   */}
-                        <View>
+                        <View style={{ backgroundColor: '#FFFFFF' }}>
                             <Text style={styles.enterpriseTitle}>Enterprise</Text>
                             <Text style={styles.enterpriseContent}>If you have interested in Carster, please contact us. {'\n'}  We are welcome always!</Text>
                             <View>
@@ -265,6 +284,7 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         width: width - 16,
+        marginBottom: 16,
     },
     inspectionText: {
         width: scrollwidth,
@@ -281,7 +301,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         paddingTop: 32,
-        textAlign: 'center'
+        textAlign: 'center',
     },
     enterpriseContent: {
         width: scrollwidth,
@@ -303,6 +323,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'black',
+        marginBottom: 16,
     },
     visitTitle: {
         width: scrollwidth,

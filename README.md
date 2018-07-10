@@ -9,3 +9,5 @@ react-native link react-native-splash-screen
 
 npm install react-native-orientation --save
 react-native link react-native-orientation
+
+"react-native-orientation": "git+https://github.com/WebMobileDeveloper/react-native-orientation.git",

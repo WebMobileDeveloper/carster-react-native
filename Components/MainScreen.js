@@ -42,7 +42,7 @@ export default class MainScreen extends Component {
 
     constructor(props) {
         super(props)
-        this.timeoutRef = null
+        // this.timeoutRef = null
         this.state = {
             rectImage: images.rect_port_Image,
             orientation: '',
@@ -51,40 +51,52 @@ export default class MainScreen extends Component {
     }
 
     componentWillMount() {
+        console.log("will mount=====")
         const orientation = Orientation.getInitialOrientation()
         this.updateOrientation(orientation)
-        this.barcodeSetting()
+        this.scannerSetting()        //  ======  scanner setting  ==============
     }
     componentDidMount() {
-        Orientation.addSensorBaseOrientationListener(this._sensorBaseOrientationChange)
-        Orientation.addSpecificOrientationListener(this._specificOrientationChange)
-        // ====== for android hardware back press  ========
-        BackHandler.addEventListener('hardwareBackPress', function () {
-            BackHandler.exitApp()
-        })
-        // ====    register screen active events  ============
-        this.subs = [
-            this.props.navigation.addListener('didFocus', () => this.startRound()),
-            this.props.navigation.addListener('willBlur', () => {
-                this.stopRound()
-                this.scanner.switchTorchOn([false])
-            }),
-        ];
+        console.log("did mount=======")
 
-        //  ======  scanner setting  ==============
+        //=====scanner setting=======
         this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE)
         this.scanner.setBeepEnabled(true)
-        this.startRound()
+
+        // ====    register screen active events  ============
+        this.subs = [
+            this.props.navigation.addListener('didFocus', () => {
+                console.log("Did focus & start round========")
+                Orientation.addSensorBaseOrientationListener(this._sensorBaseOrientationChange)
+                Orientation.addSpecificOrientationListener(this._specificOrientationChange)
+                // ====== for android hardware back press  ========
+                BackHandler.addEventListener('hardwareBackPress', this.handleBackPress)
+
+                this.startRound()
+            }),
+            this.props.navigation.addListener('willBlur', () => {
+                console.log("will Blur and stop round============")
+                this.willDisappear()
+            }),
+        ];
     }
     componentWillUnmount() {
+        console.log("will unmount======")
+        this.willDisappear()
+    }
+    willDisappear = () => {
         Orientation.removeOrientationListener(this._sensorBaseOrientationChange)
         Orientation.removeSpecificOrientationListener(this._specificOrientationChange)
-        if (this.timeoutRef) {
-            clearTimeout(this.timeoutRef)
-        }
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
+        window.clearTimeout(this.timeoutRef)
         this.scanner.stopScanning()
+        this.scanner.switchTorchOn([false])
     }
-
+    handleBackPress = () => {
+        BackHandler.exitApp()
+        this.goBack(); // works best when the goBack is async
+        return true;
+    }
     _sensorBaseOrientationChange = (orientation) => {
         this.updateOrientation(orientation)
     }
@@ -114,39 +126,34 @@ export default class MainScreen extends Component {
     }
 
     startRound = () => {
-        if (this.timeoutRef) {
-            clearTimeout(this.timeoutRef)
-        }
         this.scanner.startScanning()
-        this.timeoutRef = setTimeout(() => this.stopRound(true), Global.captureTime)
+        console.log("Global.captureTime===", Global.captureTime)
+        this.timeoutRef = window.setTimeout(() => { this.timeoutHandler(true) }, Global.captureTime)
     }
 
+    timeoutHandler = () => {
+        console.log("timeout===")
+        this.scanner.pauseScanning()
+        window.clearTimeout(this.timeoutRef)
+        Alert.alert(
+            'VIN scan timed out!',
+            'VIN Number was not scaned for ' + Math.round(Global.captureTime / 1000) + 's. You can enter number manually.',
+            [
+                { text: 'RETRY', onPress: () => this.startRound() },
+                { text: 'ENTER VIN MANUALLY', onPress: () => this.gotoManually() },
+            ],
+            { cancelable: false }
+        )
 
-    stopRound(byTimeout) {
-        const _self = this
-        if (this.timeoutRef) {
-            clearTimeout(this.timeoutRef)
-        }
-        if (this.scanner) this.scanner.pauseScanning()
-
-        if (byTimeout) {//  if timeout
-            Alert.alert(
-                'VIN scan timed out!',
-                'VIN Number was not scaned for 15s. You can enter number manually.',
-                [
-                    { text: 'RETRY', onPress: () => _self.startRound() },
-                    { text: 'ENTER VIN MANUALLY', onPress: () => _self.gotoManually() },
-                ],
-                { cancelable: false }
-            )
-        }
     }
+
 
 
     captureHandler = (session) => {
-        this.stopRound()
-        const _self = this
         let vin_number = session.newlyRecognizedCodes[0].data
+        this.scanner.pauseScanning()
+        window.clearTimeout(this.timeoutRef)
+
         if (vin_number.length > 17) {
             if (vin_number.charAt(0) == 'I') {
                 vin_number = vin_number.substring(1, 18);
@@ -158,8 +165,8 @@ export default class MainScreen extends Component {
             'Captured!',
             "Result: " + vin_number + "\n\n Please select search button for more information.",
             [
-                { text: 'SEARCH', onPress: () => _self.gotoSearch(vin_number) },
-                { text: 'RETRY', onPress: () => _self.startRound() },
+                { text: 'SEARCH', onPress: () => this.gotoSearch(vin_number) },
+                { text: 'RETRY', onPress: () => this.startRound() },
             ],
             { cancelable: false }
         )
@@ -174,7 +181,7 @@ export default class MainScreen extends Component {
         this.props.navigation.navigate('ResultScreen', { code }, )
     }
 
-    barcodeSetting = () => {
+    scannerSetting = () => {
         const codeTypes = [
             Barcode.Symbology.EAN13, Barcode.Symbology.EAN8, Barcode.Symbology.UPCA, Barcode.Symbology.UPCE, Barcode.Symbology.CODE39,
             Barcode.Symbology.ITF, Barcode.Symbology.QR, Barcode.Symbology.DATA_MATRIX, Barcode.Symbology.DATA_MATRIX, Barcode.Symbology.CODE128,
@@ -184,6 +191,9 @@ export default class MainScreen extends Component {
             this.settings.setSymbologyEnabled(type, true)
         })
         this.settings.getSymbologySettings(Barcode.Symbology.CODE39).activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+
+
     }
 
 
