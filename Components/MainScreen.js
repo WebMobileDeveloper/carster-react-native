@@ -51,13 +51,11 @@ export default class MainScreen extends Component {
     }
 
     componentWillMount() {
-        console.log("will mount=====")
         const orientation = Orientation.getInitialOrientation()
         this.updateOrientation(orientation)
         this.scannerSetting()        //  ======  scanner setting  ==============
     }
     componentDidMount() {
-        console.log("did mount=======")
 
         //=====scanner setting=======
         this.scanner.setGuiStyle(ScanOverlay.GuiStyle.NONE)
@@ -66,7 +64,6 @@ export default class MainScreen extends Component {
         // ====    register screen active events  ============
         this.subs = [
             this.props.navigation.addListener('didFocus', () => {
-                console.log("Did focus & start round========")
                 Orientation.addSensorBaseOrientationListener(this._sensorBaseOrientationChange)
                 Orientation.addSpecificOrientationListener(this._specificOrientationChange)
                 // ====== for android hardware back press  ========
@@ -75,13 +72,11 @@ export default class MainScreen extends Component {
                 this.startRound()
             }),
             this.props.navigation.addListener('willBlur', () => {
-                console.log("will Blur and stop round============")
                 this.willDisappear()
             }),
         ];
     }
     componentWillUnmount() {
-        console.log("will unmount======")
         this.willDisappear()
     }
     willDisappear = () => {
@@ -127,12 +122,10 @@ export default class MainScreen extends Component {
 
     startRound = () => {
         this.scanner.startScanning()
-        console.log("Global.captureTime===", Global.captureTime)
         this.timeoutRef = window.setTimeout(() => { this.timeoutHandler(true) }, Global.captureTime)
     }
 
     timeoutHandler = () => {
-        console.log("timeout===")
         this.scanner.pauseScanning()
         window.clearTimeout(this.timeoutRef)
         Alert.alert(
@@ -198,7 +191,6 @@ export default class MainScreen extends Component {
 
 
     render() {
-        console.log("this.state.rectImage== ", this.state.rectImage)
         return (
             <View style={styles.contentView}>
                 <BarcodePicker

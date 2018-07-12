@@ -37,7 +37,7 @@ export default class LoginScreen extends Component {
         }
     }
     componentDidMount() {
-        SplashScreen.hide()
+        // SplashScreen.hide()
         AsyncStorage.getItem('auth').then((value) => {
             if (value) {
                 const auth = JSON.parse(value)

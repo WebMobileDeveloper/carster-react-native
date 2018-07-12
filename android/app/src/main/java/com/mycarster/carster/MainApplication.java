@@ -3,10 +3,11 @@ package com.mycarster.carster;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.github.yamill.orientation.OrientationPackage;
 import com.scandit.reactnative.ScanditPackage;
 
-import org.devio.rn.splashscreen.SplashScreenReactPackage;
+//import org.devio.rn.splashscreen.SplashScreenReactPackage;
 
 import org.devio.rn.splashscreen.BuildConfig;
 import com.facebook.react.ReactNativeHost;
@@ -28,9 +29,11 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new SplashScreenReactPackage(),
             new OrientationPackage(),
-          new ScanditPackage(),
-          new SplashScreenReactPackage()
+          new ScanditPackage()
+//              ,
+//          new SplashScreenReactPackage()
       );
     }
 

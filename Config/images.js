@@ -15,6 +15,7 @@ const images = {
     footer_Image:require('../assets/footer_img.png'), 
     results_Image:require('../assets/results.png'), 
     top_back_Image:require('../assets/top_back.png'), 
+    tip_Image:require('../assets/tip.png'), 
 }
 
 export default images

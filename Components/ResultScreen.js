@@ -31,7 +31,7 @@ export default class ResultScreen extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            code: this.props.navigation.state.params.code,
+            code: this.props.navigation.state.params.code,   //"5UXKR0C52J0X84462",//
             loading: true,
             search_data: {
                 driven_wheels: "",
@@ -69,7 +69,7 @@ export default class ResultScreen extends Component {
     componentDidMount() {
         this.setState({ loading: true })
         const _self = this
-        fetch(Global.search_url,
+        fetch(Global.staging_search_url,
             {
                 method: "POST",
                 headers: new Headers({
@@ -112,7 +112,9 @@ export default class ResultScreen extends Component {
 
     _renderItem = () => {
         const items = { ...this.state.search_data }
-        const keys = Object.keys(items);
+        let keys = Object.keys(items);
+        var tip_index = keys.indexOf("safety_tips");
+        if (tip_index !== -1) keys.splice(tip_index, 1);
         let index = 0
 
         return keys.map((key) => {
@@ -154,6 +156,24 @@ export default class ResultScreen extends Component {
                 </View>
             )
         })
+    }
+
+    _renderTip = () => {
+        const items = { ...this.state.search_data }
+        if (items.safety_tips) {
+            const content = items.safety_tips.replace(/&#8217;/g, "'")
+            return (
+                <View style={tipStyle.Frame}>
+                    <View style={tipStyle.TitleFrame}>
+                        <Image style={tipStyle.mage} source={images.tip_Image} resizeMode={'contain'} />
+                        <Text style={tipStyle.Title}>SAFETY TIP OF THE DAY</Text>
+                    </View>
+                    <Text style={tipStyle.Content}>{content}</Text>
+                </View>
+            )
+        } else {
+            return null
+        }
     }
     getAlertOrder = (key) => {
         switch (key) {
@@ -208,6 +228,9 @@ export default class ResultScreen extends Component {
 
                         {/* Alerts */}
                         {this._renderAlert()}
+                        {/* tip */}
+
+                        {this._renderTip()}
 
                         {/* Inspection Report */}
                         <TouchableOpacity onPress={() => this.gotoWebPageHandler(Global.inspec_url, "Inspection Report")}><Text style={styles.inspectionText}>INSPECTION REPORT</Text></TouchableOpacity>
@@ -466,4 +489,41 @@ const scrollStyle = StyleSheet.create({
         maxWidth: scrollwidth,
         height: 100
     }
+})
+
+const tipStyle= StyleSheet.create({
+    Frame: {
+        width: scrollwidth,
+        flexDirection: 'column',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        marginBottom: 1,
+        backgroundColor: "white",
+    },
+    TitleFrame: {
+        width: scrollwidth,
+        marginBottom: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    Image: {
+        width: 28,
+        height: 30,
+        marginHorizontal: 30,
+    },
+    Title: {
+        width: scrollwidth - 70,
+        paddingRight: 20,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#222222',
+    },
+    Content: {
+        width: scrollwidth,
+        paddingHorizontal: 30,
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#222222',
+    },
 })
