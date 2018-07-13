@@ -69,7 +69,7 @@ export default class ResultScreen extends Component {
     componentDidMount() {
         this.setState({ loading: true })
         const _self = this
-        fetch(Global.staging_search_url,
+        fetch(Global.search_url,
             {
                 method: "POST",
                 headers: new Headers({
