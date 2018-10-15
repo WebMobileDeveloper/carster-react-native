@@ -10,7 +10,8 @@ import {
     AsyncStorage,
     ImageBackground,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform
 } from 'react-native'
 import SplashScreen from 'react-native-splash-screen'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -18,10 +19,10 @@ import Toast from 'react-native-easy-toast'
 import images from '../Config/images'
 import Global from '../Config/global'
 import ApiUtils from './ApiUtils'
-
+import DeviceInfo from 'react-native-device-info'
 const { width, height } = Dimensions.get('window')
-
-
+const dev_id = DeviceInfo.getDeviceId();
+const dev_type = (Platform.OS === 'ios' ? 'iOS' : 'Android');
 export default class LoginScreen extends Component {
     static navigationOptions = {
         title: 'Login',
@@ -82,7 +83,7 @@ export default class LoginScreen extends Component {
                 headers: new Headers({
                     'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
                 }),
-                body: "user_login=" + email + "&user_pass=" + password
+                body: "user_login=" + email + "&user_pass=" + password + "&dev_id=" + dev_id + "&dev_type=" + dev_type
             })
             .then(ApiUtils.checkStatus)
             .then((response) => { return response.json() })
@@ -137,7 +138,22 @@ export default class LoginScreen extends Component {
             { url, title },
         )
     }
-
+    registerFrame = () => {
+        return Platform.OS === 'android' ?
+            <View style={styles.signUpFrame}>
+                <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.register_url, "Register")}>
+                    <Text style={styles.signUpText}>Create new account</Text>
+                </TouchableOpacity>
+            </View> : <View style={styles.signUpFrame}></View>
+    }
+    visitFrame = () => {
+        return Platform.OS === 'android' ?
+            <View style={styles.visitFrame}>
+                <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.site_url, "Visit Website")}>
+                    <Text style={styles.visitText}>Visit Website</Text>
+                </TouchableOpacity>
+            </View> : <View style={styles.visitFrame}></View>
+    }
     render() {
         return (
             <ImageBackground resizeMode={'stretch'} style={styles.background} source={images.login_back_Image}  >
@@ -184,19 +200,10 @@ export default class LoginScreen extends Component {
                                 <Text style={styles.forgotText}>Forgot password?</Text>
                             </TouchableOpacity>
                         </View>
-                        <View style={styles.signUpFrame}>
-                            <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.register_url, "Register")}>
-                                <Text style={styles.signUpText}>Create new account</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                        {this.registerFrame()}
 
-                    <View style={styles.visitFrame}>
-                        <TouchableOpacity activeOpacity={0.9} onPress={() => this.handleLink(Global.site_url, "Visit Website")}>
-                            <Text style={styles.visitText}>Visit Website</Text>
-                        </TouchableOpacity>
                     </View>
-
+                    {this.visitFrame()}
                     {this.state.loading &&
                         <View style={styles.loading}>
                             <ActivityIndicator size='large' />
